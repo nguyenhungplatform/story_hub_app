@@ -1,0 +1,3 @@
+class DataModel {
+  const DataModel();
+}
