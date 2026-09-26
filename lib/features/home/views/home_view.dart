@@ -1,59 +1,144 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../app/constants/app_constants.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
+import '../../../core/services/catalog_service.dart';
+import '../../../core/widgets/app_error.dart';
+import '../../../core/widgets/app_loading.dart';
+import '../../../core/widgets/story_tiles.dart';
+import '../../../data/repositories/library_repository.dart';
+import '../../explore/controllers/explore_controller.dart';
+import '../../notifications/controllers/notifications_controller.dart';
+import '../../shell/controllers/main_controller.dart';
 import '../controllers/home_controller.dart';
-import '../models/story_model.dart';
+import 'widgets/banner_carousel.dart';
+import 'widgets/continue_reading_card.dart';
+import 'widgets/genre_tile.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
+  void _openExplore(StorySort sort) {
+    Get.find<ExploreController>().select(sort: sort, genre: null);
+    Get.find<MainController>().go(MainTab.explore);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('story hub', style: TextStyle(fontWeight: FontWeight.w800)),
-        actions: [IconButton(onPressed: () => Get.toNamed(AppRoutes.profile), icon: const Icon(Icons.person_outline))],
-      ),
-      body: RefreshIndicator(
-        onRefresh: controller.loadStories,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-          children: [
-            const Text('Một câu chuyện\ncho hôm nay?', style: AppTextStyles.display),
-            const SizedBox(height: 12),
-            const Text('Khám phá những trang viết đáng nhớ, theo nhịp đọc của riêng bạn.', style: AppTextStyles.body),
-            const SizedBox(height: 28),
-            const TextField(decoration: InputDecoration(hintText: 'Tìm truyện, tác giả...', prefixIcon: Icon(Icons.search))),
-            const SizedBox(height: 32),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              const Text('Đề xuất cho bạn', style: AppTextStyles.title),
-              TextButton(onPressed: controller.loadStories, child: const Text('Làm mới')),
-            ]),
-            const SizedBox(height: 8),
-            Obx(() {
-              if (controller.isLoading.value) return const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()));
-              return Column(children: controller.stories.map(_storyTile).toList());
+    final library = Get.find<LibraryRepository>();
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          const _HomeHeader(),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) return const AppLoading();
+              if (controller.error.value != null && controller.featured.isEmpty) {
+                return AppError(message: controller.error.value!, onRetry: controller.refreshAll);
+              }
+              final reading = library.reading.take(5).toList();
+              return RefreshIndicator(
+                onRefresh: controller.refreshAll,
+                child: ListView(
+                  padding: const EdgeInsets.only(top: 4, bottom: 24),
+                  children: [
+                    if (controller.banners.isNotEmpty) BannerCarousel(banners: controller.banners),
+                    if (reading.isNotEmpty) ...[
+                      SectionHeader('Đọc tiếp', onMore: () => Get.find<MainController>().go(MainTab.library)),
+                      SizedBox(
+                        height: 90,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: reading.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 12),
+                          itemBuilder: (_, i) => ContinueReadingCard(reading[i]),
+                        ),
+                      ),
+                    ],
+                    SectionHeader('Truyện đề cử', onMore: () => _openExplore(StorySort.hot)),
+                    SizedBox(
+                      height: 222,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: controller.featured.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
+                        itemBuilder: (_, i) => StoryGridCard(controller.featured[i]),
+                      ),
+                    ),
+                    if (controller.hotGenres.isNotEmpty) ...[
+                      const SectionHeader('Thể loại hot'),
+                      SizedBox(
+                        height: 86,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: controller.hotGenres.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 10),
+                          itemBuilder: (_, i) => GenreTile(genre: controller.hotGenres[i], index: i),
+                        ),
+                      ),
+                    ],
+                    SectionHeader('Mới cập nhật', onMore: () => _openExplore(StorySort.newest)),
+                    for (final story in controller.latest) StoryListTile(story),
+                  ],
+                ),
+              );
             }),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _storyTile(StoryModel story) {
-    return Card(
-      color: AppColors.paper,
-      elevation: 0,
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(14),
-        leading: Container(width: 52, height: 68, decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.menu_book_outlined, color: AppColors.accent)),
-        title: Text(story.title, style: AppTextStyles.title.copyWith(fontSize: 16)),
-        subtitle: Padding(padding: const EdgeInsets.only(top: 6), child: Text('${story.author}  ·  ${story.genre}\n${story.description}', maxLines: 2, overflow: TextOverflow.ellipsis)),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+class _HomeHeader extends StatelessWidget {
+  const _HomeHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final notifications = Get.find<NotificationsController>();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF6FA8FF), AppColors.primary]),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.cloud_rounded, color: Colors.white, size: 24),
+          ),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(AppConstants.appName, style: AppTextStyles.title),
+                Text(AppConstants.slogan, style: AppTextStyles.tiny),
+              ],
+            ),
+          ),
+          IconButton(onPressed: () => Get.toNamed(AppRoutes.search), icon: const Icon(Icons.search_rounded)),
+          IconButton(
+            onPressed: () => Get.toNamed(AppRoutes.notifications),
+            icon: Obx(
+              () => Badge(
+                isLabelVisible: notifications.unreadCount.value > 0,
+                smallSize: 8,
+                backgroundColor: AppColors.danger,
+                child: const Icon(Icons.notifications_none_rounded),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

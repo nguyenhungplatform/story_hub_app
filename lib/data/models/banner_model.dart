@@ -1,0 +1,15 @@
+class BannerModel {
+  const BannerModel({required this.id, required this.title, required this.imageUrl, required this.linkUrl});
+
+  factory BannerModel.fromJson(Map<String, dynamic> json) => BannerModel(
+    id: json['id'] as String,
+    title: json['title'] as String? ?? '',
+    imageUrl: json['imageUrl'] as String? ?? '',
+    linkUrl: json['linkUrl'] as String? ?? '',
+  );
+
+  final String id;
+  final String title;
+  final String imageUrl;
+  final String linkUrl;
+}
