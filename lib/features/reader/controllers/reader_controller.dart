@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
+import '../../../core/services/ad_service.dart';
 import '../../../core/services/reader_settings_service.dart';
 import '../../../core/utils/error_message.dart';
 import '../../../data/models/chapter_model.dart';
@@ -80,7 +81,9 @@ class ReaderController extends GetxController {
 
   void next() {
     final n = chapter.value?.next;
-    n == null ? showMessage('Bạn đã đọc đến chương mới nhất') : open(n.chapterNumber);
+    if (n == null) return showMessage('Bạn đã đọc đến chương mới nhất');
+    open(n.chapterNumber);
+    Get.find<AdService>().maybeShowOnNextChapter();
   }
 
   void prev() {

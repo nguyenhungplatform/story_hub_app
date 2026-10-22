@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../core/network/api_provider.dart';
+import '../../core/services/ad_service.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/catalog_service.dart';
 import '../../core/services/reader_settings_service.dart';
@@ -26,6 +27,7 @@ Future<void> initServices() async {
   Get.put(LibraryRepository(storage), permanent: true).init();
   Get.put(ReaderSettingsService(storage), permanent: true).init();
   Get.put(CatalogService(Get.find()), permanent: true);
+  Get.put(AdService(), permanent: true).init();
 }
 
 class InitialBinding extends Bindings {

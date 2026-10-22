@@ -4,6 +4,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Đọc biến môi trường từ file .env ở thư mục gốc project.
+val dotenv = rootProject.file("../.env").takeIf { it.exists() }?.readLines().orEmpty()
+    .map { it.trim() }
+    .filter { it.isNotEmpty() && !it.startsWith("#") && it.contains("=") }
+    .associate { it.substringBefore("=").trim() to it.substringAfter("=").trim() }
+
 android {
     namespace = "com.storyhub.truyencuamay"
     compileSdk = flutter.compileSdkVersion
@@ -27,6 +33,8 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["admobAppId"] =
+            dotenv["ADMOB_ANDROID_APP_ID"] ?: "ca-app-pub-3940256099942544~3347511713"
     }
 
     buildTypes {
