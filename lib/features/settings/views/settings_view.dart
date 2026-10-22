@@ -175,8 +175,9 @@ class _Group extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(color: AppColors.paper, borderRadius: BorderRadius.circular(16)),
+  Widget build(BuildContext context) => Material(
+    color: AppColors.paper,
+    borderRadius: BorderRadius.circular(16),
     clipBehavior: Clip.antiAlias,
     child: Column(children: children),
   );

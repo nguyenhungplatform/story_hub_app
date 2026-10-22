@@ -52,7 +52,9 @@ class UserAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: size / 2,
       backgroundColor: AppColors.primarySoft,
-      foregroundImage: image == null ? null : CachedNetworkImageProvider(image),
+      // Ảnh lỗi (vd. link avatar Facebook đã hết hạn → 403) thì giữ chữ cái đầu, không ném exception.
+      foregroundImage: image == null ? null : CachedNetworkImageProvider(image, errorListener: (_) {}),
+      onForegroundImageError: image == null ? null : (_, _) {},
       child: Text(
         name.isEmpty ? '?' : name.characters.first.toUpperCase(),
         style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: size * 0.4),
