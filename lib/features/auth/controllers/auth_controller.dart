@@ -18,6 +18,7 @@ class AuthController extends GetxController {
   final email = TextEditingController();
   final password = TextEditingController();
   final isLoading = false.obs;
+  final isGoogleLoading = false.obs;
 
   @override
   void onClose() {
@@ -39,6 +40,23 @@ class AuthController extends GetxController {
       showError(e);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> loginWithGoogle() async {
+    if (isLoading.value || isGoogleLoading.value) return;
+    isGoogleLoading.value = true;
+    try {
+      if (!await _auth.loginWithGoogle()) return;
+      Get.find<NotificationsController>().refreshUnread();
+      // Đóng màn đăng ký (nếu đang ở đó) rồi trả kết quả cho nơi đã mở màn đăng nhập.
+      if (Get.currentRoute == AppRoutes.register) Get.back();
+      Get.back(result: true);
+      showMessage('Chào mừng ${_auth.user.value?.displayName ?? ''}!');
+    } catch (e) {
+      showError(e);
+    } finally {
+      isGoogleLoading.value = false;
     }
   }
 

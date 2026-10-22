@@ -6,6 +6,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../controllers/auth_controller.dart';
 import 'auth_scaffold.dart';
+import 'google_sign_in_button.dart';
 
 class RegisterView extends GetView<AuthController> {
   const RegisterView({super.key});
@@ -47,6 +48,8 @@ class RegisterView extends GetView<AuthController> {
         ),
         const SizedBox(height: 24),
         Obx(() => AppButton(label: 'Đăng ký', isLoading: controller.isLoading.value, onPressed: controller.register)),
+        const SizedBox(height: 20),
+        GoogleSignInSection(controller: controller),
       ],
     );
   }

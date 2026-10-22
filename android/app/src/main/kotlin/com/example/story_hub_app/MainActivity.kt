@@ -1,4 +1,4 @@
-package com.example.story_hub_app
+package com.storyhub.truyencuamay
 
 import io.flutter.embedding.android.FlutterActivity
 

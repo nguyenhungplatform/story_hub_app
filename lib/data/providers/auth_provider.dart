@@ -1,4 +1,5 @@
 import '../../core/network/api_provider.dart';
+import '../../core/network/api_response.dart';
 import '../models/user_model.dart';
 
 class AuthProvider {
@@ -6,11 +7,12 @@ class AuthProvider {
 
   final ApiProvider _api;
 
-  Future<(String, UserModel)> login(String email, String password) async {
-    final res = await _api.post('/auth/login', body: {'email': email, 'password': password});
-    final data = res.data as Map<String, dynamic>;
-    return (data['accessToken'] as String, UserModel.fromJson(data['user'] as Map<String, dynamic>));
-  }
+  Future<(String, UserModel)> login(String email, String password) async =>
+      _session(await _api.post('/auth/login', body: {'email': email, 'password': password}));
+
+  /// Đổi Firebase ID token (Google) lấy phiên đăng nhập; backend tự tạo tài khoản nếu email chưa tồn tại.
+  Future<(String, UserModel)> loginWithFirebase(String idToken) async =>
+      _session(await _api.post('/auth/oauth/firebase', body: {'idToken': idToken}));
 
   Future<void> register(String name, String email, String password) =>
       _api.post('/auth/register', body: {'name': name, 'email': email, 'password': password});
@@ -31,4 +33,9 @@ class AuthProvider {
     '/users/me/change-password',
     body: {'currentPassword': currentPassword, 'newPassword': newPassword},
   )).message;
+
+  (String, UserModel) _session(ApiResponse<dynamic> res) {
+    final data = res.data as Map<String, dynamic>;
+    return (data['accessToken'] as String, UserModel.fromJson(data['user'] as Map<String, dynamic>));
+  }
 }

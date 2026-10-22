@@ -1,4 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, GoogleAuthProvider;
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import '../../firebase_options.dart';
 
 import '../../data/models/user_model.dart';
 import '../../data/providers/auth_provider.dart';
@@ -30,8 +35,35 @@ class AuthService extends GetxService {
     return this;
   }
 
-  Future<void> login(String email, String password) async {
-    final (token, basic) = await _provider.login(email, password);
+  Future<void> login(String email, String password) async => _startSession(await _provider.login(email, password));
+
+  /// Đăng nhập/đăng ký bằng Google qua Firebase. Trả về `false` nếu người dùng huỷ chọn tài khoản.
+  Future<bool> loginWithGoogle() async {
+    await _initGoogleSignIn();
+    final GoogleSignInAccount account;
+    try {
+      account = await GoogleSignIn.instance.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) return false;
+      rethrow;
+    }
+    final credential = GoogleAuthProvider.credential(idToken: account.authentication.idToken);
+    final result = await FirebaseAuth.instance.signInWithCredential(credential);
+    final idToken = await result.user?.getIdToken();
+    if (idToken == null) throw StateError('Không lấy được Firebase ID token');
+    await _startSession(await _provider.loginWithFirebase(idToken));
+    return true;
+  }
+
+  Future<void>? _googleInit;
+
+  Future<void> _initGoogleSignIn() => _googleInit ??= GoogleSignIn.instance.initialize(
+    clientId: defaultTargetPlatform == TargetPlatform.iOS ? DefaultFirebaseOptions.ios.iosClientId : null,
+    serverClientId: DefaultFirebaseOptions.webClientId,
+  );
+
+  Future<void> _startSession((String, UserModel) session) async {
+    final (token, basic) = session;
     _api.token = token;
     await _storage.write(StorageKeys.token, token);
     await _saveUser(basic);
@@ -62,6 +94,12 @@ class AuthService extends GetxService {
 
   Future<void> _clearSession() async {
     _api.token = null;
+    // Đăng xuất Google để lần sau hiện lại màn chọn tài khoản.
+    if (FirebaseAuth.instance.currentUser != null) {
+      await FirebaseAuth.instance.signOut();
+      await _initGoogleSignIn();
+      await GoogleSignIn.instance.signOut().catchError((_) {});
+    }
     user.value = null;
     await _storage.remove(StorageKeys.token);
     await _storage.remove(StorageKeys.user);
