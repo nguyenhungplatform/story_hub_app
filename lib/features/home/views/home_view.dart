@@ -107,15 +107,7 @@ class _HomeHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF6FA8FF), AppColors.primary]),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.cloud_rounded, color: Colors.white, size: 24),
-          ),
+          Image.asset(AppConstants.logo, width: 40, height: 40),
           const SizedBox(width: 10),
           const Expanded(
             child: Column(

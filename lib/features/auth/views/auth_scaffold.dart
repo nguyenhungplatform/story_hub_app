@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/constants/app_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
 
@@ -22,15 +23,9 @@ class AuthScaffold extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF6FA8FF), AppColors.primary]),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: const Icon(Icons.cloud_rounded, color: Colors.white, size: 36),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Image.asset(AppConstants.logo, width: 96, height: 96),
               ),
               const SizedBox(height: 20),
               Text(title, style: AppTextStyles.display),

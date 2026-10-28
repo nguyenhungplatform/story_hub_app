@@ -188,6 +188,7 @@ class ProfileView extends StatelessWidget {
                   context: context,
                   applicationName: AppConstants.appName,
                   applicationVersion: 'v${AppConstants.version}',
+                  applicationIcon: Image.asset(AppConstants.logo, width: 56, height: 56),
                   applicationLegalese: AppConstants.slogan,
                 ),
               ),
