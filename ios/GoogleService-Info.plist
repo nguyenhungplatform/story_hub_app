@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>74532496545-1eqllu9fkj5ld9rir2itikdpu7mib93e.apps.googleusercontent.com</string>
+	<string>74532496545-dbqlpv01p31meddlkbjthsij8g0c0ag0.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.74532496545-1eqllu9fkj5ld9rir2itikdpu7mib93e</string>
+	<string>com.googleusercontent.apps.74532496545-dbqlpv01p31meddlkbjthsij8g0c0ag0</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>74532496545-oi8pfo11c0734bnm41t79hjlsc9pfqse.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyC6QyCbQbLjN2vf0B8f6_FNJZK590zlHqk</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.storyhub.truyencuamay</string>
+	<string>com.truyencuamay.app</string>
 	<key>PROJECT_ID</key>
 	<string>storyhub-b9609</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:74532496545:ios:a45be3712e51eebbeebce0</string>
+	<string>1:74532496545:ios:d2a18947dc9c8e1eeebce0</string>
 </dict>
 </plist>

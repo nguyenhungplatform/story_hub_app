@@ -30,6 +30,6 @@ abstract final class DefaultFirebaseOptions {
     projectId: 'storyhub-b9609',
     storageBucket: 'storyhub-b9609.firebasestorage.app',
     iosClientId: '74532496545-1eqllu9fkj5ld9rir2itikdpu7mib93e.apps.googleusercontent.com',
-    iosBundleId: 'com.storyhub.truyencuamay',
+    iosBundleId: 'com.truyencuamay.app',
   );
 }

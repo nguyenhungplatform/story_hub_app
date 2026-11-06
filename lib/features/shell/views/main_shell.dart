@@ -21,7 +21,15 @@ class MainShell extends GetView<MainController> {
           if (!didPop) controller.go(MainTab.home);
         },
         child: Scaffold(
-          body: IndexedStack(index: controller.index.value, children: _tabs),
+          // IndexedStack giữ mọi tab trong cây widget → chỉ bật Hero ở tab đang hiển thị
+          // để tránh trùng tag 'cover-<id>' khi cùng một truyện có ở nhiều tab.
+          body: IndexedStack(
+            index: controller.index.value,
+            children: [
+              for (var i = 0; i < _tabs.length; i++)
+                HeroMode(enabled: i == controller.index.value, child: _tabs[i]),
+            ],
+          ),
           bottomNavigationBar: DecoratedBox(
             decoration: const BoxDecoration(
               boxShadow: [BoxShadow(color: Color(0x0F000000), blurRadius: 12, offset: Offset(0, -2))],
