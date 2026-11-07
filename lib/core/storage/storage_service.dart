@@ -52,5 +52,7 @@ abstract final class StorageKeys {
   static const searchHistory = 'search_history';
   static const readerSettings = 'reader_settings';
   static const notifyEnabled = 'notify_enabled';
+  static const notifyNewStory = 'notify_new_story';
+  static const skippedUpdateVersion = 'skipped_update_version';
   static const readingReminder = 'reading_reminder';
 }

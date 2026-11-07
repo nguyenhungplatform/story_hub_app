@@ -18,13 +18,28 @@ class ApiProvider {
   /// Gọi khi server trả về 401 để phiên đăng nhập được xoá.
   void Function()? onUnauthorized;
 
-  Future<ApiResponse<dynamic>> get(String path, {Map<String, dynamic>? query}) => _send('GET', path, query: query);
+  /// [timeout] ghi đè timeout mặc định; [authenticated] = false để không gửi Bearer token
+  /// (và không kích hoạt đăng xuất khi gặp 401) với API public.
+  Future<ApiResponse<dynamic>> get(
+    String path, {
+    Map<String, dynamic>? query,
+    Duration? timeout,
+    bool authenticated = true,
+  }) => _send('GET', path, query: query, timeout: timeout, authenticated: authenticated);
   Future<ApiResponse<dynamic>> post(String path, {Object? body}) => _send('POST', path, body: body);
   Future<ApiResponse<dynamic>> put(String path, {Object? body}) => _send('PUT', path, body: body);
   Future<ApiResponse<dynamic>> patch(String path, {Object? body}) => _send('PATCH', path, body: body);
-  Future<ApiResponse<dynamic>> delete(String path) => _send('DELETE', path);
+  Future<ApiResponse<dynamic>> delete(String path, {Object? body}) => _send('DELETE', path, body: body);
 
-  Future<ApiResponse<dynamic>> _send(String method, String path, {Map<String, dynamic>? query, Object? body}) async {
+  Future<ApiResponse<dynamic>> _send(
+    String method,
+    String path, {
+    Map<String, dynamic>? query,
+    Object? body,
+    Duration? timeout,
+    bool authenticated = true,
+  }) async {
+    final token = authenticated ? this.token : null;
     final uri = Uri.parse(
       '${ApiConstants.baseUrl}$path',
     ).replace(queryParameters: query?.map((k, v) => MapEntry(k, '$v')));
@@ -37,7 +52,7 @@ class ApiProvider {
 
     final http.Response response;
     try {
-      response = await http.Response.fromStream(await client.send(request).timeout(ApiConstants.timeout));
+      response = await http.Response.fromStream(await client.send(request).timeout(timeout ?? ApiConstants.timeout));
     } on SocketException {
       throw const ApiException(statusCode: 0, code: 'NETWORK_ERROR', message: 'No connection');
     } on TimeoutException {

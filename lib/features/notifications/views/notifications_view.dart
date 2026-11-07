@@ -4,11 +4,11 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../core/widgets/app_error.dart';
 import '../../../core/widgets/app_loading.dart';
 import '../../../core/widgets/cover_image.dart';
-import '../../../core/widgets/story_tiles.dart';
 import '../../../data/models/notification_model.dart';
 import '../controllers/notifications_controller.dart';
 
@@ -30,7 +30,8 @@ class _NotificationsViewState extends State<NotificationsView> {
 
   void _open(NotificationModel item) {
     controller.markRead(item);
-    if (item.storySlug != null) openStory(item.storySlug!);
+    // Dùng chung logic điều hướng với push; đang ở màn Thông báo nên trường hợp mặc định không làm gì.
+    Get.find<NotificationService>().open(item.pushData);
   }
 
   @override
@@ -79,40 +80,55 @@ class _NotificationsViewState extends State<NotificationsView> {
             separatorBuilder: (_, _) => const Divider(indent: 16, endIndent: 16),
             itemBuilder: (_, i) {
               final item = controller.items[i];
-              return Material(
-                color: item.read ? Colors.transparent : AppColors.primarySoft.withValues(alpha: 0.5),
-                child: InkWell(
-                  onTap: () => _open(item),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CoverImage(item.storyCover, width: 44, height: 58, radius: 6),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.message,
-                                style: AppTextStyles.body.copyWith(
-                                  fontWeight: item.read ? FontWeight.w400 : FontWeight.w600,
+              return Dismissible(
+                key: ValueKey(item.id),
+                direction: DismissDirection.endToStart,
+                onDismissed: (_) => controller.delete(item),
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 24),
+                  color: AppColors.danger,
+                  child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+                ),
+                child: Material(
+                  color: item.read ? Colors.transparent : AppColors.primarySoft.withValues(alpha: 0.5),
+                  child: InkWell(
+                    onTap: () => _open(item),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CoverImage(item.storyCover, width: 44, height: 58, radius: 6),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (item.title != null && item.title!.isNotEmpty) ...[
+                                  Text(item.title!, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700)),
+                                  const SizedBox(height: 2),
+                                ],
+                                Text(
+                                  item.message,
+                                  style: AppTextStyles.body.copyWith(
+                                    fontWeight: item.read ? FontWeight.w400 : FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              if (item.createdAt != null) Text(item.createdAt!.timeAgo, style: AppTextStyles.tiny),
-                            ],
+                                const SizedBox(height: 4),
+                                if (item.createdAt != null) Text(item.createdAt!.timeAgo, style: AppTextStyles.tiny),
+                              ],
+                            ),
                           ),
-                        ),
-                        if (!item.read)
-                          Container(
-                            margin: const EdgeInsets.only(left: 8, top: 6),
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                          ),
-                      ],
+                          if (!item.read)
+                            Container(
+                              margin: const EdgeInsets.only(left: 8, top: 6),
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

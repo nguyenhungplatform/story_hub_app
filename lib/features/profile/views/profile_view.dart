@@ -5,6 +5,7 @@ import '../../../app/constants/app_constants.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
+import '../../../core/services/app_info.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/utils/link_launcher.dart';
 import '../../../core/widgets/cover_image.dart';
@@ -180,10 +181,8 @@ class ProfileView extends StatelessWidget {
                 icon: Icons.mail_rounded,
                 label: 'Liên hệ qua email',
                 subtitle: AppConstants.supportEmail,
-                onTap: () => LinkLauncher.sendEmail(
-                  AppConstants.supportEmail,
-                  subject: 'Hỗ trợ ${AppConstants.appName}',
-                ),
+                onTap: () =>
+                    LinkLauncher.sendEmail(AppConstants.supportEmail, subject: 'Hỗ trợ ${AppConstants.appName}'),
               ),
               _MenuItem(
                 icon: Icons.person_remove_rounded,
@@ -217,7 +216,7 @@ class ProfileView extends StatelessWidget {
                 onTap: () => showAboutDialog(
                   context: context,
                   applicationName: AppConstants.appName,
-                  applicationVersion: 'v${AppConstants.version}',
+                  applicationVersion: 'v${Get.find<AppInfo>().version}',
                   applicationIcon: Image.asset(AppConstants.logo, width: 56, height: 56),
                   applicationLegalese: AppConstants.slogan,
                 ),

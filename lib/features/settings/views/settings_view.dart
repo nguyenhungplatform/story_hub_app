@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../app/constants/app_constants.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
+import '../../../core/services/app_info.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/services/reader_settings_service.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/utils/error_message.dart';
@@ -21,8 +22,10 @@ class SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<SettingsView> {
   final storage = Get.find<StorageService>();
   final reader = Get.find<ReaderSettingsService>();
+  final notification = Get.find<NotificationService>();
 
-  late bool _notify = storage.read<bool>(StorageKeys.notifyEnabled) ?? true;
+  late bool _notify = notification.enabled;
+  late bool _newStory = notification.newStoryEnabled;
   late bool _reminder = storage.read<bool>(StorageKeys.readingReminder) ?? false;
 
   Future<void> _pick<T>(String title, List<T> values, String Function(T) label, Rx<T> target) async {
@@ -115,13 +118,25 @@ class _SettingsViewState extends State<SettingsView> {
                 SwitchListTile(
                   secondary: const Icon(Icons.notifications_none_rounded, color: AppColors.ink),
                   title: const Text('Nhận thông báo', style: AppTextStyles.body),
-                  subtitle: const Text('Chương mới của truyện đang theo dõi', style: AppTextStyles.tiny),
+                  subtitle: const Text('Tắt để không nhận bất kỳ thông báo nào', style: AppTextStyles.tiny),
                   value: _notify,
-                  onChanged: (v) {
+                  onChanged: (v) async {
                     setState(() => _notify = v);
-                    storage.write(StorageKeys.notifyEnabled, v);
+                    await notification.setEnabled(v);
                     Get.find<NotificationsController>().refreshUnread();
                   },
+                ),
+                SwitchListTile(
+                  secondary: const Icon(Icons.auto_stories_outlined, color: AppColors.ink),
+                  title: const Text('Truyện mới', style: AppTextStyles.body),
+                  subtitle: const Text('Báo khi có truyện mới được xuất bản', style: AppTextStyles.tiny),
+                  value: _notify && _newStory,
+                  onChanged: _notify
+                      ? (v) {
+                          setState(() => _newStory = v);
+                          notification.setNewStoryEnabled(v);
+                        }
+                      : null,
                 ),
                 SwitchListTile(
                   secondary: const Icon(Icons.alarm_rounded, color: AppColors.ink),
@@ -143,10 +158,10 @@ class _SettingsViewState extends State<SettingsView> {
                   label: 'Xoá lịch sử đọc',
                   onTap: _clearHistory,
                 ),
-                const _Row(
-                  leading: Icon(Icons.info_outline_rounded, size: 22),
+                _Row(
+                  leading: const Icon(Icons.info_outline_rounded, size: 22),
                   label: 'Phiên bản',
-                  value: 'v${AppConstants.version}',
+                  value: 'v${Get.find<AppInfo>().version}',
                 ),
               ],
             ),

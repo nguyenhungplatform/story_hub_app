@@ -37,7 +37,7 @@ class NotificationsController extends GetxController {
       return;
     }
     try {
-      unreadCount.value = (await _provider.fetch()).unreadCount;
+      unreadCount.value = await _provider.unreadCount();
     } catch (_) {}
   }
 
@@ -64,6 +64,30 @@ class NotificationsController extends GetxController {
     try {
       await _provider.markRead(item.id);
     } catch (_) {}
+  }
+
+  /// Đánh dấu đã đọc khi mở từ push (thông báo có thể chưa có trong danh sách đã tải).
+  Future<void> markReadById(String id) async {
+    final item = items.firstWhereOrNull((e) => e.id == id);
+    if (item != null) return markRead(item);
+    try {
+      await _provider.markRead(id);
+    } catch (_) {}
+    await refreshUnread();
+  }
+
+  Future<void> delete(NotificationModel item) async {
+    final index = items.indexOf(item);
+    if (index < 0) return;
+    items.removeAt(index);
+    if (!item.read && unreadCount.value > 0) unreadCount.value--;
+    try {
+      await _provider.delete(item.id);
+    } catch (e) {
+      items.insert(index, item);
+      if (!item.read) unreadCount.value++;
+      showError(e);
+    }
   }
 
   Future<void> markAllRead() async {
