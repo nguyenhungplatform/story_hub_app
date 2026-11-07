@@ -6,6 +6,7 @@ import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/utils/link_launcher.dart';
 import '../../../core/widgets/cover_image.dart';
 import '../../../data/repositories/library_repository.dart';
 import '../../library/controllers/library_controller.dart';
@@ -172,6 +173,35 @@ class ProfileView extends StatelessWidget {
               ),
             ],
           ),
+          const _MenuHeader('Hỗ trợ'),
+          _Menu(
+            children: [
+              _MenuItem(
+                icon: Icons.mail_rounded,
+                label: 'Liên hệ qua email',
+                subtitle: AppConstants.supportEmail,
+                onTap: () => LinkLauncher.sendEmail(
+                  AppConstants.supportEmail,
+                  subject: 'Hỗ trợ ${AppConstants.appName}',
+                ),
+              ),
+              _MenuItem(
+                icon: Icons.person_remove_rounded,
+                label: 'Hỗ trợ xoá tài khoản',
+                onTap: () => LinkLauncher.openUrl(AppConstants.deleteAccountUrl),
+              ),
+              _MenuItem(
+                icon: Icons.privacy_tip_rounded,
+                label: 'Chính sách bảo mật',
+                onTap: () => LinkLauncher.openUrl(AppConstants.privacyPolicyUrl),
+              ),
+              _MenuItem(
+                icon: Icons.description_rounded,
+                label: 'Điều khoản sử dụng',
+                onTap: () => LinkLauncher.openUrl(AppConstants.termsOfUseUrl),
+              ),
+            ],
+          ),
           _Menu(
             children: [
               _MenuItem(icon: Icons.settings_rounded, label: 'Cài đặt', onTap: () => Get.toNamed(AppRoutes.settings)),
@@ -247,11 +277,33 @@ class _Menu extends StatelessWidget {
   }
 }
 
+class _MenuHeader extends StatelessWidget {
+  const _MenuHeader(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 4, 16, 8),
+      child: Text(title, style: AppTextStyles.tiny.copyWith(fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
 class _MenuItem extends StatelessWidget {
-  const _MenuItem({required this.icon, required this.label, required this.onTap, this.trailing, this.color});
+  const _MenuItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.subtitle,
+    this.trailing,
+    this.color,
+  });
 
   final IconData icon;
   final String label;
+  final String? subtitle;
   final VoidCallback onTap;
   final Widget? trailing;
   final Color? color;
@@ -265,6 +317,7 @@ class _MenuItem extends StatelessWidget {
         label,
         style: AppTextStyles.body.copyWith(color: color ?? AppColors.ink, fontWeight: FontWeight.w500),
       ),
+      subtitle: subtitle == null ? null : Text(subtitle!, style: AppTextStyles.tiny),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

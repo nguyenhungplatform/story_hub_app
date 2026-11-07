@@ -1,8 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../app/constants/app_constants.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
+import '../../../core/utils/link_launcher.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
@@ -57,7 +60,48 @@ class LoginView extends GetView<AuthController> {
             TextButton(onPressed: () => Get.toNamed(AppRoutes.register), child: const Text('Đăng ký ngay')),
           ],
         ),
+        const SizedBox(height: 8),
+        const _LegalNotice(),
       ],
+    );
+  }
+}
+
+class _LegalNotice extends StatefulWidget {
+  const _LegalNotice();
+
+  @override
+  State<_LegalNotice> createState() => _LegalNoticeState();
+}
+
+class _LegalNoticeState extends State<_LegalNotice> {
+  late final TapGestureRecognizer _terms = TapGestureRecognizer()
+    ..onTap = () => LinkLauncher.openUrl(AppConstants.termsOfUseUrl);
+  late final TapGestureRecognizer _privacy = TapGestureRecognizer()
+    ..onTap = () => LinkLauncher.openUrl(AppConstants.privacyPolicyUrl);
+
+  @override
+  void dispose() {
+    _terms.dispose();
+    _privacy.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const link = TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600);
+    return Text.rich(
+      TextSpan(
+        style: const TextStyle(color: AppColors.muted, fontSize: 12.5, height: 1.5),
+        children: [
+          const TextSpan(text: 'Khi đăng nhập, bạn đã đồng ý với '),
+          TextSpan(text: 'Điều khoản sử dụng', style: link, recognizer: _terms),
+          const TextSpan(text: ' và '),
+          TextSpan(text: 'Chính sách bảo mật', style: link, recognizer: _privacy),
+          const TextSpan(text: ' của ${AppConstants.appName}.'),
+        ],
+      ),
+      textAlign: TextAlign.center,
     );
   }
 }
