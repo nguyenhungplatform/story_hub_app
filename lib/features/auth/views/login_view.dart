@@ -11,7 +11,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../controllers/auth_controller.dart';
 import 'auth_scaffold.dart';
-import 'google_sign_in_button.dart';
+import 'social_sign_in_section.dart';
 
 class LoginView extends GetView<AuthController> {
   const LoginView({super.key});
@@ -51,7 +51,7 @@ class LoginView extends GetView<AuthController> {
         const SizedBox(height: 8),
         Obx(() => AppButton(label: 'Đăng nhập', isLoading: controller.isLoading.value, onPressed: controller.login)),
         const SizedBox(height: 20),
-        GoogleSignInSection(controller: controller),
+        SocialSignInSection(controller: controller),
         const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,

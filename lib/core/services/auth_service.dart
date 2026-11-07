@@ -1,4 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, GoogleAuthProvider;
+import 'package:firebase_auth/firebase_auth.dart'
+    show AppleAuthProvider, FirebaseAuth, FirebaseAuthException, GoogleAuthProvider, User;
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -49,10 +50,37 @@ class AuthService extends GetxService {
     }
     final credential = GoogleAuthProvider.credential(idToken: account.authentication.idToken);
     final result = await FirebaseAuth.instance.signInWithCredential(credential);
-    final idToken = await result.user?.getIdToken();
+    await _startFirebaseSession(result.user);
+    return true;
+  }
+
+  /// Chỉ có trên iOS: đăng nhập Apple qua Firebase. Trả về `false` nếu người dùng huỷ.
+  bool get supportsAppleSignIn => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
+  Future<bool> loginWithApple() async {
+    final provider = AppleAuthProvider()
+      ..addScope('email')
+      ..addScope('name');
+    final User? firebaseUser;
+    try {
+      firebaseUser = (await FirebaseAuth.instance.signInWithProvider(provider)).user;
+    } on FirebaseAuthException catch (e) {
+      if (_isAppleCancel(e)) return false;
+      rethrow;
+    }
+    await _startFirebaseSession(firebaseUser);
+    return true;
+  }
+
+  /// Người dùng đóng sheet Apple: ASAuthorizationError.canceled (1001).
+  static bool _isAppleCancel(FirebaseAuthException e) =>
+      const {'canceled', 'cancelled', 'web-context-canceled', 'user-cancelled'}.contains(e.code) ||
+      (e.message ?? '').contains('1001');
+
+  Future<void> _startFirebaseSession(User? firebaseUser) async {
+    final idToken = await firebaseUser?.getIdToken();
     if (idToken == null) throw StateError('Không lấy được Firebase ID token');
     await _startSession(await _provider.loginWithFirebase(idToken));
-    return true;
   }
 
   Future<void>? _googleInit;
@@ -94,7 +122,7 @@ class AuthService extends GetxService {
 
   Future<void> _clearSession() async {
     _api.token = null;
-    // Đăng xuất Google để lần sau hiện lại màn chọn tài khoản.
+    // Đăng xuất Firebase (Google/Apple); với Google để lần sau hiện lại màn chọn tài khoản.
     if (FirebaseAuth.instance.currentUser != null) {
       await FirebaseAuth.instance.signOut();
       await _initGoogleSignIn();

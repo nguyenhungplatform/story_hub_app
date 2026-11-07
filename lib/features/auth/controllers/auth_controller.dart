@@ -19,6 +19,10 @@ class AuthController extends GetxController {
   final password = TextEditingController();
   final isLoading = false.obs;
   final isGoogleLoading = false.obs;
+  final isAppleLoading = false.obs;
+
+  bool get supportsAppleSignIn => _auth.supportsAppleSignIn;
+  bool get _busy => isLoading.value || isGoogleLoading.value || isAppleLoading.value;
 
   @override
   void onClose() {
@@ -43,11 +47,15 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> loginWithGoogle() async {
-    if (isLoading.value || isGoogleLoading.value) return;
-    isGoogleLoading.value = true;
+  Future<void> loginWithGoogle() => _socialLogin(isGoogleLoading, _auth.loginWithGoogle);
+
+  Future<void> loginWithApple() => _socialLogin(isAppleLoading, _auth.loginWithApple);
+
+  Future<void> _socialLogin(RxBool loading, Future<bool> Function() signIn) async {
+    if (_busy) return;
+    loading.value = true;
     try {
-      if (!await _auth.loginWithGoogle()) return;
+      if (!await signIn()) return;
       Get.find<NotificationsController>().refreshUnread();
       // Đóng màn đăng ký (nếu đang ở đó) rồi trả kết quả cho nơi đã mở màn đăng nhập.
       if (Get.currentRoute == AppRoutes.register) Get.back();
@@ -56,7 +64,7 @@ class AuthController extends GetxController {
     } catch (e) {
       showError(e);
     } finally {
-      isGoogleLoading.value = false;
+      loading.value = false;
     }
   }
 
