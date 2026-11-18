@@ -16,13 +16,13 @@ class AdService extends GetxService {
   bool get _supported => Platform.isAndroid || Platform.isIOS;
 
   Future<AdService> init() async {
-    if (!_supported || Env.interstitialAdUnitId.isEmpty) {
+    if (!_supported || (Env.interstitialAdUnitId.isEmpty && Env.bannerAdUnitId.isEmpty)) {
       _log('Bỏ qua: nền tảng không hỗ trợ hoặc thiếu Ad Unit ID trong .env');
       return this;
     }
     await MobileAds.instance.initialize();
     _log('Đã khởi tạo, unit = ${Env.interstitialAdUnitId}, tỉ lệ = ${Env.nextChapterAdRate}');
-    _loadInterstitial();
+    if (Env.interstitialAdUnitId.isNotEmpty) _loadInterstitial();
     return this;
   }
 

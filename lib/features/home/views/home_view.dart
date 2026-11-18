@@ -6,6 +6,7 @@ import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
 import '../../../core/services/catalog_service.dart';
+import '../../../core/widgets/ad_banner.dart';
 import '../../../core/widgets/app_error.dart';
 import '../../../core/widgets/app_loading.dart';
 import '../../../core/widgets/story_tiles.dart';
@@ -84,6 +85,7 @@ class HomeView extends GetView<HomeController> {
                         ),
                       ),
                     ],
+                    const AdBanner(key: ValueKey('home-banner')),
                     SectionHeader('Mới cập nhật', onMore: () => _openExplore(StorySort.newest)),
                     for (final story in controller.latest) StoryListTile(story),
                   ],

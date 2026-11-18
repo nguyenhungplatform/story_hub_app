@@ -19,6 +19,18 @@ abstract final class Env {
         : dotenv.get('ADMOB_ANDROID_INTERSTITIAL_ID', fallback: '');
   }
 
+  /// Banner: bản debug dùng ID test adaptive banner của Google.
+  static String get bannerAdUnitId {
+    if (kDebugMode) {
+      return Platform.isIOS
+          ? 'ca-app-pub-3940256099942544/2435281174'
+          : 'ca-app-pub-3940256099942544/9214589741';
+    }
+    return Platform.isIOS
+        ? dotenv.get('ADMOB_IOS_BANNER_ID', fallback: '')
+        : dotenv.get('ADMOB_ANDROID_BANNER_ID', fallback: '');
+  }
+
   /// Tỉ lệ hiện quảng cáo khi sang chương sau (0.0 – 1.0).
   static double get nextChapterAdRate =>
       (double.tryParse(dotenv.get('AD_NEXT_CHAPTER_RATE', fallback: '')) ?? 0.3).clamp(0.0, 1.0);

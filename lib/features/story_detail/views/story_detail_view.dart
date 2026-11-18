@@ -9,6 +9,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
 import '../../../core/utils/error_message.dart';
 import '../../../core/utils/extensions.dart';
+import '../../../core/widgets/ad_banner.dart';
 import '../../../core/widgets/app_error.dart';
 import '../../../core/widgets/app_loading.dart';
 import '../../../core/widgets/cover_image.dart';
@@ -227,6 +228,7 @@ class _Body extends StatelessWidget {
             ),
           ),
         ),
+        const AdBanner(key: ValueKey('detail-chapters-banner')),
         SectionHeader(
           'Danh sách chương',
           moreLabel: 'Tất cả ${story.chapters.length}',
@@ -279,6 +281,7 @@ class _Body extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
           child: CommentSection(controller: controller),
         ),
+        const AdBanner(key: ValueKey('detail-bottom-banner'), padding: EdgeInsets.only(bottom: 24)),
       ],
     );
   }
