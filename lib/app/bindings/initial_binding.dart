@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../core/network/api_provider.dart';
 import '../../core/services/ad_service.dart';
+import '../../core/services/analytics_service.dart';
 import '../../core/services/app_info.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/catalog_service.dart';
@@ -26,6 +27,7 @@ import '../../features/shell/controllers/main_controller.dart';
 Future<void> initServices() async {
   final (storage, appInfo) = await (Get.put(StorageService(), permanent: true).init(), AppInfo.load()).wait;
   Get.put(appInfo, permanent: true);
+  Get.put(AnalyticsService(), permanent: true);
   final api = Get.put(ApiProvider(), permanent: true);
   final authProvider = Get.put(AuthProvider(api), permanent: true);
   Get.put(StoryProvider(api), permanent: true);

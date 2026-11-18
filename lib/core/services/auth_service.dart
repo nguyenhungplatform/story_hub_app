@@ -11,6 +11,7 @@ import '../../data/providers/auth_provider.dart';
 import '../network/api_provider.dart';
 import '../network/api_response.dart';
 import '../storage/storage_service.dart';
+import 'analytics_service.dart';
 
 /// Giữ phiên đăng nhập: token + thông tin user, đồng bộ với [ApiProvider] và bộ nhớ cục bộ.
 class AuthService extends GetxService {
@@ -30,6 +31,7 @@ class AuthService extends GetxService {
     if (token != null && cached is Map<String, dynamic>) {
       _api.token = token;
       user.value = UserModel.fromJson(cached);
+      AnalyticsService.to.setUser(user.value!.id);
       refreshProfile();
     }
     _api.onUnauthorized = _clearSession;
@@ -109,6 +111,7 @@ class AuthService extends GetxService {
   Future<void> updateProfile({String? name}) async => _saveUser(await _provider.updateMe(name: name));
 
   Future<void> logout() async {
+    AnalyticsService.to.logLogout();
     try {
       await _provider.logout();
     } on ApiException catch (_) {}
@@ -116,6 +119,7 @@ class AuthService extends GetxService {
   }
 
   Future<void> _saveUser(UserModel value) async {
+    if (user.value?.id != value.id) AnalyticsService.to.setUser(value.id);
     user.value = value;
     await _storage.write(StorageKeys.user, value.toJson());
   }
@@ -129,6 +133,7 @@ class AuthService extends GetxService {
       await GoogleSignIn.instance.signOut().catchError((_) {});
     }
     user.value = null;
+    AnalyticsService.to.setUser(null);
     await _storage.remove(StorageKeys.token);
     await _storage.remove(StorageKeys.user);
   }

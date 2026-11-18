@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
+import '../../../core/services/analytics_service.dart';
 import '../../../core/services/catalog_service.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/utils/error_message.dart';
@@ -83,6 +84,7 @@ class StorySearchController extends GetxController {
       if (id != _requestId) return;
       results.assignAll(page.items);
       total.value = page.pagination.total;
+      if (saveHistory) AnalyticsService.to.logSearch(q, resultCount: page.pagination.total);
       _page = page.pagination.page;
       _hasMore = page.pagination.hasMore;
     } catch (e) {

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/ad_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/services/reader_settings_service.dart';
 import '../../../core/utils/error_message.dart';
 import '../../../data/models/chapter_model.dart';
@@ -56,6 +57,7 @@ class ReaderController extends GetxController {
       final value = _cache[number] ?? await _provider.fetchChapter(slug, number);
       _cache[number] = value;
       chapter.value = value;
+      AnalyticsService.to.logReadChapter(slug, number, storyTitle: story.value?.title ?? value.storyTitle);
       if (scroll.hasClients) scroll.jumpTo(0);
       _saveProgress();
       _prefetch(value.next?.chapterNumber);

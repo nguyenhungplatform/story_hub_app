@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/utils/error_message.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -37,6 +38,7 @@ class AuthController extends GetxController {
     isLoading.value = true;
     try {
       await _auth.login(email.text.trim(), password.text);
+      AnalyticsService.to.logLogin('email');
       Get.find<NotificationsController>().refreshUnread();
       Get.back(result: true);
       showMessage('Chào mừng ${_auth.user.value?.displayName ?? ''} quay trở lại!');
@@ -47,15 +49,16 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> loginWithGoogle() => _socialLogin(isGoogleLoading, _auth.loginWithGoogle);
+  Future<void> loginWithGoogle() => _socialLogin('google', isGoogleLoading, _auth.loginWithGoogle);
 
-  Future<void> loginWithApple() => _socialLogin(isAppleLoading, _auth.loginWithApple);
+  Future<void> loginWithApple() => _socialLogin('apple', isAppleLoading, _auth.loginWithApple);
 
-  Future<void> _socialLogin(RxBool loading, Future<bool> Function() signIn) async {
+  Future<void> _socialLogin(String method, RxBool loading, Future<bool> Function() signIn) async {
     if (_busy) return;
     loading.value = true;
     try {
       if (!await signIn()) return;
+      AnalyticsService.to.logLogin(method);
       Get.find<NotificationsController>().refreshUnread();
       // Đóng màn đăng ký (nếu đang ở đó) rồi trả kết quả cho nơi đã mở màn đăng nhập.
       if (Get.currentRoute == AppRoutes.register) Get.back();
@@ -73,6 +76,7 @@ class AuthController extends GetxController {
     isLoading.value = true;
     try {
       await _provider.register(name.text.trim(), email.text.trim(), password.text);
+      AnalyticsService.to.logSignUp('email');
       await _auth.login(email.text.trim(), password.text);
       // Đóng màn đăng ký và màn đăng nhập phía sau.
       Get.until((route) => route.settings.name != AppRoutes.register && route.settings.name != AppRoutes.login);

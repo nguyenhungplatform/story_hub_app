@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 
 import '../app/constants/app_constants.dart';
+import '../core/services/analytics_service.dart';
 import 'bindings/initial_binding.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
@@ -19,6 +20,7 @@ class StoryHubApp extends StatelessWidget {
       initialBinding: InitialBinding(),
       initialRoute: AppRoutes.main,
       getPages: AppPages.pages,
+      navigatorObservers: AnalyticsService.to.navigatorObservers,
       theme: AppTheme.light,
       defaultTransition: Transition.cupertino,
       locale: const Locale('vi', 'VN'),

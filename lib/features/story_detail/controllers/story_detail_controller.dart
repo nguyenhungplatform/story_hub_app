@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../../app/routes/app_routes.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/catalog_service.dart';
 import '../../../core/utils/error_message.dart';
@@ -53,6 +54,7 @@ class StoryDetailController extends GetxController {
     error.value = null;
     try {
       final value = await _provider.fetchStory(slug);
+      if (story.value == null) AnalyticsService.to.logViewStory(value);
       story.value = value;
       favoriteCount.value = value.favoriteCount;
       followCount.value = value.followCount;
@@ -109,6 +111,7 @@ class StoryDetailController extends GetxController {
     isToggling.value = true;
     try {
       final (active, count) = await _provider.toggleReaction(slug, kind);
+      AnalyticsService.to.logReaction(kind, slug, active);
       if (kind == 'favorite') {
         favorited.value = active;
         favoriteCount.value = count;
@@ -163,6 +166,7 @@ class StoryDetailController extends GetxController {
     try {
       final comment = await _provider.postComment(slug, text);
       comments.insert(0, comment);
+      AnalyticsService.to.logComment(slug);
       commentTotal.value++;
       return true;
     } catch (e) {
